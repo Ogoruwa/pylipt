@@ -1,0 +1,86 @@
+from enum import IntEnum
+from collections import namedtuple
+
+
+class TokenType(IntEnum):
+    """ Single character tokens """
+    #  Block tokens.
+    LEFT_PAREN = 1
+    RIGHT_PAREN = 2
+    LEFT_BRACE = 3
+    RIGHT_BRACE = 4
+    LEFT_BRACKET = 5
+    RIGHT_BRACKET = 6
+    COMMA = 7
+    DOT = 8
+    SEMICOLON = 9
+    COLON = 10
+    SINGLE_QUOTE = 11
+    DOUBLE_QUOTE = 12
+
+    # Arithmetic operators
+    MINUS = 20
+    PLUS = 21
+    SLASH = 22
+    STAR = 23
+
+    # Relational operators.
+    BANG = 30
+    BANG_EQUAL = 31
+    EQUAL = 32
+    EQUAL_EQUAL = 33
+    GREATER = 34
+    GREATER_EQUAL = 35
+    LESS = 36
+    LESS_EQUAL = 37
+
+    """ Literals """
+    IDENTIFIER = 50
+    STRING = 51
+    NUMBER = 52
+    LINE_SEPERATOR = 58
+
+    """ Keywords """
+    # Boolean operators.
+    AND = 60
+    OR = 61
+
+    # Control flow
+    FOR = 70
+    WHILE = 71
+    IF = 72
+    ELSE = 73
+    ELIF = 74
+    CONTINUE = 75
+    BREAK = 76
+    RETURN = 77
+
+    # Functions and classes
+    FN = 80
+    CLASS = 81
+    SUPER = 82
+    SELF = 83
+
+    # Literals
+    FALSE = 90
+    NIL = 91
+    TRUE = 92
+
+    # Variables
+    VAR = 100
+    CONST = 101
+
+    PRINT = 110
+
+    EOF = 128
+
+
+Token = namedtuple(
+    "Token",
+    (
+        "token_type",
+        "lexeme",
+        "literal",
+        "line"
+    )
+)
