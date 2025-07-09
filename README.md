@@ -32,11 +32,31 @@ Based on the tutorial at [craftinginterpreters.com](craftinginterpreters.com).
 
 ## Installation
 
+- Setup virtual environment
+
+```bash
+python -m venv .venv
+```
+- Activate virtual environment
+
+```bash
+source .venv/bin/activate  # Linux, MacOS
+```
+```bash
+.venv\Scripts\activate  # Windows
+```
+
 - Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ````
+
+- Install the project in the virtual environment
+
+```bash
+pip install -e .
+```
 
 ---
 
