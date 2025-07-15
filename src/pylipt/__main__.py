@@ -6,7 +6,7 @@ def main(script: str, command: bool = False):
     if script:
         from .interpreter.main import Interpreter
 
-        interpreter = Interpreter()
+        interpreter = Interpreter(input, print, print)
 
         if command:
             stream = StringIO(script)

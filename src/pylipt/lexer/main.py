@@ -1,10 +1,11 @@
 from typing import Any
 
 from pylipt.token.main import Token, TokenType
-from .mapping import SINGLE_TOKEN_MAPPING
+from .mapping import SINGLE_TOKEN_MAPPING, DOUBLE_TOKEN_PAIRS, DOUBLE_TOKEN_MAPPING
 
 
 class Lexer:
+    """ Provides methods to parse source code as tokens """
     def __init__(self, source: str) -> None:
         self._line = 1
         self._start = 0
@@ -13,32 +14,62 @@ class Lexer:
         self._tokens: list[Token] = []
 
     def is_finished(self) -> bool:
+        """ Returns whether source has been completely parsed """
         return self._current >= len(self._source)
 
 
     def _next_character(self) -> str:
+        """ Returns the next character in the source for parsing """
         character = self._source[self._current]
         self._current += 1
         return character
 
 
     def _add_next_token(self, token_type: TokenType, literal: Any):
+        """ Adds current string as a token """
         string = self._source[self._start:self._current]
         token = Token(token_type, string, literal, self._line)
         self._tokens.append(token)
 
     def add_next_token(self, token_type: TokenType):
+        """ Wrapper function for `_add_next_token`, for setting the literal """
         self._add_next_token(token_type, None)
+
+    def match_next_character(self, expected: str) -> bool:
+        """ If next character matches expected character, add token"""
+        if self.is_finished():
+            return False
+        elif self._source[self._current] != expected:
+            return False
+        else:
+            self._current += 1
+            return True
 
 
     def scan_token(self):
+        """ Scans the current string for a valid token """
         character = self._next_character()
-        match character:
-            case i if i in SINGLE_TOKEN_MAPPING:
-                self.add_next_token(SINGLE_TOKEN_MAPPING[i])
+
+        if character in SINGLE_TOKEN_MAPPING:
+            single = True
+
+            if character in DOUBLE_TOKEN_PAIRS:
+                next_character = ''
+                next_characters = DOUBLE_TOKEN_PAIRS[character]
+
+                for next_character in next_characters:
+                    if self.match_next_character(next_character):
+                        single = False
+                        break
+
+            if single:
+                self.add_next_token(SINGLE_TOKEN_MAPPING[character])
+            else:
+                self.add_next_token(DOUBLE_TOKEN_MAPPING[character + next_character])
 
 
     def scan_tokens(self) -> list[Token]:
+        """ Parse source completely """
         while not self.is_finished():
             self._start = self._current
             self.scan_token()

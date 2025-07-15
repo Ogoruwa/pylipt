@@ -41,8 +41,7 @@ class REPL:
         self._session = PromptSession(input = create_input(self.stdin), output = create_output(self.stdout))
 
         self._intro = dedent("""
-            Pylipt 0.1.0 (main, Jul 08 2025, 00:00:00) [Python 3.13.5] on linux
-            Type \"help\", \"copyright\", \"credits\" or \"license\" for more information.
+            Pylipt 0.1.0 (main, Jul 08 2025, 00:00:00) [Python 3.13.5]
         """)
 
     def _generate_prompt(self, continuation: bool = False) -> tuple[StyleAndTextTuples, Style]:

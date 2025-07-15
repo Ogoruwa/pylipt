@@ -1,7 +1,7 @@
 import unittest
 
 from pylipt.lexer.main import Lexer
-from pylipt.lexer.mapping import SINGLE_TOKEN_MAPPING
+from pylipt.lexer.mapping import SINGLE_TOKEN_MAPPING, DOUBLE_TOKEN_MAPPING
 from pylipt.token.main import TokenType, Token
 
 
@@ -86,7 +86,17 @@ class LexerTestCase(unittest.TestCase):
 
         for lexeme, token_type in zip(SINGLE_TOKEN_MAPPING.keys(), SINGLE_TOKEN_MAPPING.values()):
             expected.append(Token(token_type, lexeme, None, 1))
-            line = line + lexeme
+            line = line + lexeme + " "
+
+        self.generate_test(line, expected)
+
+    def test_parse_double_token(self):
+        line = ""
+        expected = []
+
+        for lexeme, token_type in zip(DOUBLE_TOKEN_MAPPING.keys(), DOUBLE_TOKEN_MAPPING.values()):
+            expected.append(Token(token_type, lexeme, None, 1))
+            line = line + lexeme + " "
 
         self.generate_test(line, expected)
 
