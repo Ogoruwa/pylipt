@@ -9,7 +9,7 @@ from prompt_toolkit.patch_stdout import patch_stdout
 from prompt_toolkit.input.defaults import create_input
 from prompt_toolkit.output.defaults import create_output
 from prompt_toolkit.shortcuts import print_formatted_text
-from prompt_toolkit.formatted_text import StyleAndTextTuples
+from prompt_toolkit.formatted_text import StyleAndTextTuples, FormattedText
 
 from .settings import get_settings
 from ..interpreter.main import Stream, Interpreter
@@ -29,11 +29,9 @@ class REPL:
         self._prompt_settings = {
             "enable_suspend": True,
             "complete_in_thread" : True,
-            "prompt_continuation": (lambda : self._generate_prompt(True)),
+            "prompt_continuation": self._generate_continuation_prompt
         }
 
-        self._prompt = PROMPT.LINE
-        self._prompt_continuation = PROMPT.CONTINUE
         self._settings = get_settings()
         self._line_terminator = get_line_terminator()
 
@@ -44,19 +42,24 @@ class REPL:
             Pylipt 0.1.0 (main, Jul 08 2025, 00:00:00) [Python 3.13.5]
         """)
 
-    def _generate_prompt(self, continuation: bool = False) -> tuple[StyleAndTextTuples, Style]:
-        if continuation:
-            prompt = [("class:line_terminator", self._line_terminator), ("class:prompt", self._prompt)]
-            prompt_style = Style.from_dict({"prompt": "#884444"})
-        else:
-            prompt = [ ("class:line_terminator", self._line_terminator), ("class:prompt", self._prompt) ]
-            prompt_style = Style.from_dict({"prompt": "#884444"})
+    def _generate_line_prompt(self) -> FormattedText:
+        prompt_text = [("class:line_terminator", self._line_terminator), ("class:prompt", PROMPT.LINE)]
+        prompt_style = Style.from_dict({"prompt": "#884444"})
+        prompt = FormattedText((prompt_text, prompt_style))
 
-        return prompt, prompt_style
+        return prompt
+
+    def _generate_continuation_prompt(self, width: int, line_number: int, is_soft_wrap: bool) -> StyleAndTextTuples:
+        prompt = [
+            ("class:line_terminator", self._line_terminator),
+            ("class:prompt", (' ' * (width - len(PROMPT.CONTINUE)) + PROMPT.CONTINUE))
+        ]
+
+        return prompt
 
 
     def read(self) -> str:
-        prompt, prompt_style = self._generate_prompt()
+        prompt, prompt_style = self._generate_line_prompt()
         text = self._session.prompt(prompt, **self._prompt_settings, style = prompt_style)
         return text
 
@@ -73,7 +76,7 @@ class REPL:
             self.print(get_line_terminator(), True)
 
         except KeyboardInterrupt:
-            self.print("KeyboardInterrupt")
+            self.print("KeyboardInterrupt\n")
 
         except EOFError:
             return False

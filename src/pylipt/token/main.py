@@ -1,5 +1,5 @@
 from enum import IntEnum
-from collections import namedtuple
+from typing import NamedTuple, Any
 
 
 class TokenType(IntEnum):
@@ -38,7 +38,7 @@ class TokenType(IntEnum):
     IDENTIFIER = 50
     STRING = 51
     NUMBER = 52
-    LINE_SEPERATOR = 58
+    COMMENT = 57
 
     """ Keywords """
     # Boolean operators.
@@ -75,12 +75,12 @@ class TokenType(IntEnum):
     EOF = 128
 
 
-Token = namedtuple(
+Token = NamedTuple(
     "Token",
-    (
-        "token_type",
-        "lexeme",
-        "literal",
-        "line"
-    )
+    [
+        ("token_type", TokenType),
+        ("lexeme", str),
+        ("literal", Any),
+        ("line", int)
+    ]
 )

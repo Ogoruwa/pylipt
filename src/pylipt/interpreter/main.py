@@ -45,19 +45,18 @@ class Interpreter(BaseInterpreter):
     def print_error(self, text: str):
         self._print_error(text)
 
-    def _execute(self, line: str):
+    def _execute(self, source: str):
         self.had_error = False
 
         try:
-            tokens = self.parse_source(line)
+            tokens = self.parse_source(source)
             self.parse_tokens(tokens)
 
         except Exception as e:
-            self.error(1, line, str(e), "")
+            self.error(1, source, str(e), "")
             raise e
 
     def error(self, line_no: int, line: str, message: str, token: str):
-
         self.had_error = True
         message = ErrorReporter.format_error(line_no, line, message, token)
         self.print_error(message + get_line_terminator())
@@ -106,4 +105,3 @@ class Interpreter(BaseInterpreter):
     def execute_file(self, filepath: str):
         with open(filepath, "r") as file:
             self.execute_stream(file)
-

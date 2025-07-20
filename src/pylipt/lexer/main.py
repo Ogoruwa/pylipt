@@ -1,6 +1,7 @@
 from typing import Any
 
 from pylipt.token.main import Token, TokenType
+from pylipt.utils.text import get_line_terminator, get_whitespace
 from .mapping import SINGLE_TOKEN_MAPPING, DOUBLE_TOKEN_PAIRS, DOUBLE_TOKEN_MAPPING
 
 
@@ -17,13 +18,11 @@ class Lexer:
         """ Returns whether source has been completely parsed """
         return self._current >= len(self._source)
 
-
     def _next_character(self) -> str:
         """ Returns the next character in the source for parsing """
         character = self._source[self._current]
         self._current += 1
         return character
-
 
     def _add_next_token(self, token_type: TokenType, literal: Any):
         """ Adds current string as a token """
@@ -45,16 +44,28 @@ class Lexer:
             self._current += 1
             return True
 
+    def peek_next_character(self):
+        """ Get next character without advancing """
+        if self.is_finished():
+            return '\0'
+        else:
+            return self._source[self._current]
 
     def scan_token(self):
         """ Scans the current string for a valid token """
         character = self._next_character()
 
-        if character in SINGLE_TOKEN_MAPPING:
+        if character == get_line_terminator():
+            self._line += 1
+
+        elif character in get_whitespace():
+            pass
+
+        elif character in SINGLE_TOKEN_MAPPING:
             single = True
+            next_character = ''
 
             if character in DOUBLE_TOKEN_PAIRS:
-                next_character = ''
                 next_characters = DOUBLE_TOKEN_PAIRS[character]
 
                 for next_character in next_characters:
@@ -63,9 +74,19 @@ class Lexer:
                         break
 
             if single:
-                self.add_next_token(SINGLE_TOKEN_MAPPING[character])
+                token_type = SINGLE_TOKEN_MAPPING[character]
             else:
-                self.add_next_token(DOUBLE_TOKEN_MAPPING[character + next_character])
+                token_type = DOUBLE_TOKEN_MAPPING[character + next_character]
+
+            if token_type == TokenType.COMMENT:
+                while not self.is_finished() and self.peek_next_character() != get_line_terminator():
+                    self._next_character()
+            else:
+                self.add_next_token(token_type)
+
+        else:
+            # Invalid token encountered
+            pass
 
 
     def scan_tokens(self) -> list[Token]:
@@ -76,5 +97,5 @@ class Lexer:
 
         eof_token = Token(TokenType.EOF, "", None, self._line)
         self._tokens.append(eof_token)
-        # self.add_next_token(TokenType.EOF)
+
         return self._tokens

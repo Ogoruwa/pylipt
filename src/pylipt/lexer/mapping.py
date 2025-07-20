@@ -31,6 +31,7 @@ SINGLE_TOKEN_MAPPING = {
 DOUBLE_TOKEN_PAIRS = {
     # A dictionary mapping single tokens to a list of single tokens it can be paired with
 
+    '/': ['/'],
     '!': ['='],
     '=' : ['='],
     '<' : ['='],
@@ -40,7 +41,7 @@ DOUBLE_TOKEN_PAIRS = {
 
 DOUBLE_TOKEN_MAPPING = {
     # A dictionary mapping single token pairs to their token type
-
+    '//': TokenType.COMMENT,
     '!=': TokenType.BANG_EQUAL,
     '==': TokenType.EQUAL_EQUAL,
     '>=': TokenType.GREATER_EQUAL,

@@ -1,8 +1,9 @@
 import unittest
 
 from pylipt.lexer.main import Lexer
-from pylipt.lexer.mapping import SINGLE_TOKEN_MAPPING, DOUBLE_TOKEN_MAPPING
 from pylipt.token.main import TokenType, Token
+from pylipt.utils.text import get_line_terminator
+from pylipt.lexer.mapping import SINGLE_TOKEN_MAPPING, DOUBLE_TOKEN_MAPPING
 
 
 def generate_nested_values(start_value: str, end_value: str, layers: int, depth: int) -> str:
@@ -77,7 +78,7 @@ class LexerTestCase(unittest.TestCase):
 
         self.generate_test(line, expected)
 
-    def test_empty_source(self):
+    def test_parse_empty_source(self):
         self.generate_test("", [Token(TokenType.EOF, "", None, 1)], False)
 
     def test_parse_single_token(self):
@@ -95,11 +96,50 @@ class LexerTestCase(unittest.TestCase):
         expected = []
 
         for lexeme, token_type in zip(DOUBLE_TOKEN_MAPPING.keys(), DOUBLE_TOKEN_MAPPING.values()):
+            # Test comments separately
+            if token_type == TokenType.COMMENT:
+                continue
             expected.append(Token(token_type, lexeme, None, 1))
             line = line + lexeme + " "
 
         self.generate_test(line, expected)
 
+    def test_parse_whitespace(self):
+        line = "( \n \t.\t <= ! )"
+        expected = [
+            Token(TokenType.LEFT_PAREN, '(', None, 1), Token(TokenType.DOT, '.', None, 2),
+            Token(TokenType.LESS_EQUAL, '<=', None, 2), Token(TokenType.BANG, '!', None, 2),
+            Token(TokenType.RIGHT_PAREN, ')', None, 2),
+        ]
+        self.generate_test(line, expected)
+
+    def test_parse_single_line_comment(self):
+        line = "//\tHello World- 0 () "
+        expected = []
+        self.generate_test(line, expected)
+
+    def test_parse_inline_comments(self):
+        line = f"() // Should not be parsed"
+        expected = [
+            Token(TokenType.LEFT_PAREN, '(', None, 1),
+            Token(TokenType.RIGHT_PAREN, ')', None, 1),
+        ]
+
+        self.generate_test(line, expected)
+
+    def test_parse_multiple_single_line_comments(self):
+        line = f"// Hello World{get_line_terminator()}//testing ... +=!=/"
+        expected = []
+        self.generate_test(line, expected)
+
+    def test_parse_multiple_lines(self):
+        lines = f"(){get_line_terminator()}(){get_line_terminator()}()"
+        expected = [
+            Token(TokenType.LEFT_PAREN, '(', None, 1), Token(TokenType.RIGHT_PAREN, ')', None, 1),
+            Token(TokenType.LEFT_PAREN, '(', None, 2), Token(TokenType.RIGHT_PAREN, ')', None, 2),
+            Token(TokenType.LEFT_PAREN, '(', None, 3), Token(TokenType.RIGHT_PAREN, ')', None, 3)
+        ]
+        self.generate_test(lines, expected)
 
 
 if __name__ == '__main__':
